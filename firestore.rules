@@ -1,0 +1,118 @@
+rules_version = '2';
+
+// DRAFT rules matching the FirestorePaths structure in
+// lib/services/firestore_paths.dart. Review before going live —
+// in particular, tighten the coach/trainee scoping (currently any coach
+// in an org can read/write any programme; restrict to assigned
+// programmes once assignment data is finalised) and add App Check.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function userDoc(orgId) {
+      return get(/databases/$(database)/documents/organisations/$(orgId)/users/$(request.auth.uid));
+    }
+
+    function role(orgId) {
+      return userDoc(orgId).data.role;
+    }
+
+    function isSuperAdmin(orgId) {
+      return isSignedIn() && role(orgId) == 'superAdmin';
+    }
+
+    function isHeadCoachOrAbove(orgId) {
+      return isSignedIn() && (role(orgId) == 'headCoach' || role(orgId) == 'superAdmin');
+    }
+
+    function isCoachOrAbove(orgId) {
+      return isSignedIn() &&
+        (role(orgId) == 'coach' || role(orgId) == 'headCoach' || role(orgId) == 'superAdmin');
+    }
+
+    function isOrgMember(orgId) {
+      return isSignedIn() && exists(/databases/$(database)/documents/organisations/$(orgId)/users/$(request.auth.uid));
+    }
+
+    match /organisations/{orgId} {
+
+      match /users/{userId} {
+        allow read: if isOrgMember(orgId);
+        allow write: if isHeadCoachOrAbove(orgId) || request.auth.uid == userId;
+      }
+
+      match /programmes/{programmeId} {
+        allow read: if isOrgMember(orgId);
+        allow write: if isCoachOrAbove(orgId);
+
+        match /phases/{phaseId} {
+          allow read: if isOrgMember(orgId);
+          allow write: if isCoachOrAbove(orgId);
+        }
+
+        match /sessions/{sessionId} {
+          allow read: if isOrgMember(orgId);
+          allow write: if isCoachOrAbove(orgId);
+
+          match /attendance/{attendanceId} {
+            allow read: if isOrgMember(orgId);
+            allow write: if isCoachOrAbove(orgId);
+          }
+
+          match /feedbackEntries/{feedbackId} {
+            allow read: if isOrgMember(orgId);
+            // Coaches write feedback about trainees; trainees can write
+            // their own self-reflection entries only.
+            allow create: if isCoachOrAbove(orgId) ||
+              (isOrgMember(orgId) && request.resource.data.authorId == request.auth.uid);
+            allow update, delete: if isCoachOrAbove(orgId);
+          }
+        }
+      }
+
+      match /taskDefinitions/{taskId} {
+        allow read: if isOrgMember(orgId);
+        allow write: if isCoachOrAbove(orgId);
+      }
+
+      match /taskCompletions/{completionId} {
+        allow read: if isOrgMember(orgId);
+        // Trainee creates their own submissions; coach approves/rejects.
+        allow create: if isOrgMember(orgId) && request.resource.data.traineeId == request.auth.uid;
+        allow update: if isCoachOrAbove(orgId);
+      }
+
+      match /skiHoursEntries/{entryId} {
+        allow read: if isOrgMember(orgId);
+        allow create: if isOrgMember(orgId) && request.resource.data.traineeId == request.auth.uid;
+        allow update: if isCoachOrAbove(orgId); // verification
+      }
+
+      match /skillTags/{tagId} {
+        allow read: if isOrgMember(orgId);
+        allow write: if isHeadCoachOrAbove(orgId);
+      }
+
+      match /channels/{channelId} {
+        allow read: if isOrgMember(orgId);
+        allow write: if isCoachOrAbove(orgId);
+
+        match /messages/{messageId} {
+          allow read: if isOrgMember(orgId);
+          allow create: if isOrgMember(orgId) && request.resource.data.senderId == request.auth.uid;
+        }
+      }
+    }
+
+    // Lookup collection so AuthService can resolve which org a uid
+    // belongs to before the org-scoped user doc can be read.
+    match /userIndex/{userId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow write: if false; // written only by trusted backend/Cloud Function on user creation
+    }
+  }
+}

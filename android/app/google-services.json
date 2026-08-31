@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "156852939589",
+    "project_id": "bass-training-app-360af",
+    "storage_bucket": "bass-training-app-360af.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:156852939589:android:51568c0951f001d9552c2c",
+        "android_client_info": {
+          "package_name": "com.example.bass_training_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBrbCrjw9vCTvB5SedqGflJnPrqu5Ik72A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
