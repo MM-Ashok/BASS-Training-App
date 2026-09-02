@@ -40,49 +40,5 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBaYmzc1Yv6PzicJvCvsVXhDdLl7QRlt1Q',
-    appId: '1:208799525750:web:992e22fb8417482e072857',
-    messagingSenderId: '208799525750',
-    projectId: 'bass-training-app-88bb9',
-    authDomain: 'bass-training-app-88bb9.firebaseapp.com',
-    storageBucket: 'bass-training-app-88bb9.firebasestorage.app',
-    measurementId: 'G-0F4TCQSPX9',
-  );
-
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBjFYupl1qI-kpJEOp7HPNuIC2QS9LnC8Q',
-    appId: '1:208799525750:android:f26877d9d076dffe072857',
-    messagingSenderId: '208799525750',
-    projectId: 'bass-training-app-88bb9',
-    storageBucket: 'bass-training-app-88bb9.firebasestorage.app',
-  );
-
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBYp2d1aJdfQ-nFWFwCinn_QQOj6BalyiI',
-    appId: '1:208799525750:ios:13d161e7768c1930072857',
-    messagingSenderId: '208799525750',
-    projectId: 'bass-training-app-88bb9',
-    storageBucket: 'bass-training-app-88bb9.firebasestorage.app',
-    iosBundleId: 'com.basstraining.app',
-  );
-
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyBYp2d1aJdfQ-nFWFwCinn_QQOj6BalyiI',
-    appId: '1:208799525750:ios:13d161e7768c1930072857',
-    messagingSenderId: '208799525750',
-    projectId: 'bass-training-app-88bb9',
-    storageBucket: 'bass-training-app-88bb9.firebasestorage.app',
-    iosBundleId: 'com.basstraining.app',
-  );
-
-  static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyBaYmzc1Yv6PzicJvCvsVXhDdLl7QRlt1Q',
-    appId: '1:208799525750:web:4fa056b8886161d2072857',
-    messagingSenderId: '208799525750',
-    projectId: 'bass-training-app-88bb9',
-    authDomain: 'bass-training-app-88bb9.firebaseapp.com',
-    storageBucket: 'bass-training-app-88bb9.firebasestorage.app',
-    measurementId: 'G-GDSMJJZQ1H',
-  );
+  // Insert static variables web,android,ios,macos,windows
 }
