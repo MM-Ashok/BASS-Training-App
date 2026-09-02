@@ -5,6 +5,15 @@ rules_version = '2';
 // in particular, tighten the coach/trainee scoping (currently any coach
 // in an org can read/write any programme; restrict to assigned
 // programmes once assignment data is finalised) and add App Check.
+//
+// NOTE on collectionGroup queries: AttendanceService.watchForTrainee(),
+// FeedbackService.watchForTraineeBySkill(), and the Squad Engagement
+// screen all use collectionGroup('attendance') / collectionGroup(
+// 'feedbackEntries') to query across every session at once. Firestore
+// evaluates security rules by document path, so the nested `match`
+// blocks below already govern those collectionGroup reads — no separate
+// top-level rule is needed as long as every attendance/feedbackEntries
+// document lives at the nested path this schema defines.
 
 service cloud.firestore {
   match /databases/{database}/documents {

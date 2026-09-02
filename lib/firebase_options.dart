@@ -41,48 +41,48 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCZWzmNjozN3y1n9CiQZ4kakKy1UPDhzco',
-    appId: '1:156852939589:web:26acb87c0dce59e4552c2c',
-    messagingSenderId: '156852939589',
-    projectId: 'bass-training-app-360af',
-    authDomain: 'bass-training-app-360af.firebaseapp.com',
-    storageBucket: 'bass-training-app-360af.firebasestorage.app',
-    measurementId: 'G-0F7JCF0JES',
+    apiKey: 'AIzaSyBaYmzc1Yv6PzicJvCvsVXhDdLl7QRlt1Q',
+    appId: '1:208799525750:web:992e22fb8417482e072857',
+    messagingSenderId: '208799525750',
+    projectId: 'bass-training-app-88bb9',
+    authDomain: 'bass-training-app-88bb9.firebaseapp.com',
+    storageBucket: 'bass-training-app-88bb9.firebasestorage.app',
+    measurementId: 'G-0F4TCQSPX9',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBrbCrjw9vCTvB5SedqGflJnPrqu5Ik72A',
-    appId: '1:156852939589:android:51568c0951f001d9552c2c',
-    messagingSenderId: '156852939589',
-    projectId: 'bass-training-app-360af',
-    storageBucket: 'bass-training-app-360af.firebasestorage.app',
+    apiKey: 'AIzaSyBjFYupl1qI-kpJEOp7HPNuIC2QS9LnC8Q',
+    appId: '1:208799525750:android:f26877d9d076dffe072857',
+    messagingSenderId: '208799525750',
+    projectId: 'bass-training-app-88bb9',
+    storageBucket: 'bass-training-app-88bb9.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBcOeyQuK8S1A9KyAzjEjRY8MFpGQKqHWk',
-    appId: '1:156852939589:ios:b96bc0d80ee070bd552c2c',
-    messagingSenderId: '156852939589',
-    projectId: 'bass-training-app-360af',
-    storageBucket: 'bass-training-app-360af.firebasestorage.app',
-    iosBundleId: 'com.example.bassTrainingApp',
+    apiKey: 'AIzaSyBYp2d1aJdfQ-nFWFwCinn_QQOj6BalyiI',
+    appId: '1:208799525750:ios:13d161e7768c1930072857',
+    messagingSenderId: '208799525750',
+    projectId: 'bass-training-app-88bb9',
+    storageBucket: 'bass-training-app-88bb9.firebasestorage.app',
+    iosBundleId: 'com.basstraining.app',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyBcOeyQuK8S1A9KyAzjEjRY8MFpGQKqHWk',
-    appId: '1:156852939589:ios:b96bc0d80ee070bd552c2c',
-    messagingSenderId: '156852939589',
-    projectId: 'bass-training-app-360af',
-    storageBucket: 'bass-training-app-360af.firebasestorage.app',
-    iosBundleId: 'com.example.bassTrainingApp',
+    apiKey: 'AIzaSyBYp2d1aJdfQ-nFWFwCinn_QQOj6BalyiI',
+    appId: '1:208799525750:ios:13d161e7768c1930072857',
+    messagingSenderId: '208799525750',
+    projectId: 'bass-training-app-88bb9',
+    storageBucket: 'bass-training-app-88bb9.firebasestorage.app',
+    iosBundleId: 'com.basstraining.app',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyCZWzmNjozN3y1n9CiQZ4kakKy1UPDhzco',
-    appId: '1:156852939589:web:99700a299b26b2ff552c2c',
-    messagingSenderId: '156852939589',
-    projectId: 'bass-training-app-360af',
-    authDomain: 'bass-training-app-360af.firebaseapp.com',
-    storageBucket: 'bass-training-app-360af.firebasestorage.app',
-    measurementId: 'G-073ED8T1ZC',
+    apiKey: 'AIzaSyBaYmzc1Yv6PzicJvCvsVXhDdLl7QRlt1Q',
+    appId: '1:208799525750:web:4fa056b8886161d2072857',
+    messagingSenderId: '208799525750',
+    projectId: 'bass-training-app-88bb9',
+    authDomain: 'bass-training-app-88bb9.firebaseapp.com',
+    storageBucket: 'bass-training-app-88bb9.firebasestorage.app',
+    measurementId: 'G-GDSMJJZQ1H',
   );
 }

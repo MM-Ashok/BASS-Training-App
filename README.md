@@ -1,261 +1,131 @@
-# BASS Training App
+# BASS Training App — Flutter Scaffold
 
-A role-based training management application built with Flutter, using Firebase Authentication and Cloud Firestore as the primary backend. BASS Training helps coaching organizations manage programmes, phases, sessions, tasks, attendance, feedback, and trainee experience tracking through a single mobile application.
+A Flutter/Firebase codebase for the BASS multi-role training academy
+platform, covering every feature area in the project brief with working
+logic and screens. This is a strong build-ready foundation — not
+device-tested, store-submitted, production-polished software. Read
+"What still needs real dev time" below before treating anything here as
+launch-ready.
 
-## Table of Contents
+## What's implemented
 
-- [About](#about)
-- [Tech Stack](#tech-stack)
-- [User Roles](#user-roles)
-- [Core Training Hierarchy](#core-training-hierarchy)
-- [Features](#features)
-  - [Authentication & Account Flow](#authentication--account-flow)
-  - [Dashboards](#dashboards)
-  - [User Management](#user-management)
-  - [Programme Management](#programme-management)
-  - [Phase Management](#phase-management)
-  - [Session Management](#session-management)
-  - [Task Management](#task-management)
-  - [Attendance Management](#attendance-management)
-  - [Coach Feedback / Skill Assessment](#coach-feedback--skill-assessment)
-  - [Trainee Experience / 70-Hour Tracking](#trainee-experience--70-hour-tracking)
-  - [Messaging](#messaging)
-- [Firestore Data Structure](#firestore-data-structure)
-- [Permissions Overview](#permissions-overview)
-- [Known Limitations / In-Progress Areas](#known-limitations--in-progress-areas)
-- [Getting Started](#getting-started)
+- **Data models** for all four roles, programmes, phases, sessions, task
+  library, ski hours, feedback journal, attendance/engagement, messaging,
+  and org branding.
+- **Firestore data model** — org-scoped multi-tenant structure supporting
+  white-label licensing (`lib/services/firestore_paths.dart`).
+- **Programme builder** — full create/edit/delete for programmes, phases
+  (drag-reorder), and sessions.
+- **Task library** — auto-verified and coach-reviewed tasks, trainee
+  submission flow, coach approval queue.
+- **70-hour Ski School Experience tracker** — weighted pace calculation
+  engine (`lib/services/pace_calculation_service.dart`) with a dashboard
+  screen: progress bar, pace status, activity breakdown chart.
+- **Session feedback journal** — coach and self-reflection entries,
+  skills-framework tagging, voice-to-text dictation (`speech_to_text`),
+  and a cross-reference view filtering a trainee's whole history by skill
+  tag (`lib/screens/shared/feedback_journal_screen.dart`,
+  `trainee_feedback_history_screen.dart`).
+- **Attendance tracking** — coach check-in screen per session, trainee
+  history view, feeds directly into engagement scoring.
+- **Engagement scoring** — composite score from real attendance, task
+  completion, and coach responsiveness (measured from actual
+  submittedAt→reviewedAt gaps on task completions, not a placeholder).
+  Live squad-wide view for Head Coach (`squad_engagement_screen.dart`).
+- **Messaging** — team channels, one-way programme broadcasts (posting
+  restricted to Head Coach/Super Admin), and DMs, with a channel list and
+  chat screen.
+- **Offline functionality** — outbox write-queue pattern
+  (`lib/services/offline_service.dart`), wired end-to-end: attendance
+  writes route through it when offline, queue optimistically updates the
+  UI, and `main.dart` replays the queue against Firestore once
+  connectivity returns. Other write paths still write directly to
+  Firestore and rely on the Firestore SDK's own offline cache — extending
+  the explicit queue to those is straightforward following the
+  `AttendanceProvider` pattern.
+- **End-of-season PDF and XLSX reporting** — wired to real ski-hours,
+  task, and attendance data with a report-preview screen and native
+  share sheet (`season_report_screen.dart`).
+- **White-label architecture** — per-organisation branding (app name,
+  primary/accent color, logo URL) stored in Firestore, loaded at runtime
+  by `BrandingProvider`, editable via a Super Admin settings screen
+  (`branding_settings_screen.dart`). Swapping a licensee's look is a data
+  change, not a rebuild.
+- Role-based routing (Super Admin / Head Coach / Coach / Trainee).
+- Firestore security rules draft (`firestore.rules`) matching the data
+  model, including notes on collectionGroup query coverage.
 
-## About
+## What still needs real dev time before this is a shippable app
 
-BASS Training is built around a nested training hierarchy — **Programme → Phase → Session → Task** — with supporting records for attendance, coach feedback, and trainee experience. The app uses **Riverpod** for state and provider management and **Material 3** for UI.
+- **Device/SDK validation** — this was built without a Flutter SDK
+  available in the build environment, so it has not been run through
+  `flutter analyze`, `flutter pub get`, or an emulator. Expect to fix a
+  handful of minor type/import issues on first build.
+- **User management screen** — Super Admin can theoretically provision
+  users via `AuthService.createUser`, but there's no UI for it yet.
+- **Roster-aware feedback/attendance** — session screens currently assume
+  a simple trainee list (`programme.traineeIds`); a real roster
+  picker/multi-select UI is still needed for sessions with several
+  trainees.
+- **Full offline write coverage** — only attendance currently
+  demonstrates the outbox queue end-to-end; task submissions, feedback
+  entries, ski-hours logs, and chat messages still write directly to
+  Firestore (safe online, but not queued if offline — Firestore's cache
+  handles reads offline regardless).
+- **Push notifications** — Cloud Messaging is a dependency, not yet
+  configured.
+- **Programme-linked ski hours target dates** — the 70-hour tracker and
+  season report currently use a placeholder programme date window;
+  wire to the trainee's actual assigned programme once that relationship
+  is finalized in the UI.
+- **App Store / Play Store submission assets and automated tests.**
 
-## Tech Stack
+## Getting it running
 
-- **Framework:** Flutter / Dart (Material 3 UI)
-- **State Management:** Riverpod
-- **Authentication:** Firebase Authentication (email/password)
-- **Database:** Cloud Firestore
-- **Storage:** Firebase Storage (profile photo uploads)
-- **Messaging:** Firebase Cloud Messaging (dependency included)
+1. Install Flutter (stable channel) — https://docs.flutter.dev/get-started/install
+2. `flutter pub get`
+3. **Firebase setup** (required before the app will do anything beyond
+   showing the login screen):
+   - Create a Firebase project in the console
+   - Install the FlutterFire CLI: `dart pub global activate flutterfire_cli`
+   - Run `flutterfire configure` from the project root — this generates
+     `lib/firebase_options.dart` (intentionally gitignored/not included
+     here since it's tied to a specific Firebase project)
+   - Enable Email/Password auth in Firebase Console → Authentication
+   - Create a Firestore database (production mode)
+   - Deploy `firestore.rules`: `firebase deploy --only firestore:rules`
+     (requires `firebase-tools`: `npm install -g firebase-tools`)
+   - Add the composite/collectionGroup indexes Firestore will prompt for
+     the first time you run the attendance-history, feedback-history, and
+     squad-engagement screens (Firestore's error message includes a
+     direct "create index" link — click it).
+4. Since sign-up is invite-only by design (see `AuthService.createUser`),
+   manually seed one Super Admin user for first login — either via the
+   Firebase Console (Authentication tab, add user) plus a matching
+   Firestore doc at `organisations/demo-org/users/{uid}`, or write a
+   one-off script calling `AuthService.createUser(...)`.
+5. `flutter run`
 
-## User Roles
-
-| Role | Description |
-|---|---|
-| **Super Admin** | Full system administration |
-| **Head Coach** | Manages users and training programmes at head-coach level |
-| **Coach** | Works with programmes/training content and communicates with users |
-| **Trainee** | Views personal training experience, communication, and profile |
-
-## Core Training Hierarchy
-
-```
-Programme
- └── Phase
-      └── Session
-           ├── Task
-           ├── Attendance
-           └── Feedback
-
-Trainee
- └── Experience
-```
-
-- **Programme** — top-level training programme/season with dates and lifecycle status.
-- **Phase** — an ordered subdivision of a programme with dates and status.
-- **Session** — a scheduled training session within a phase, assigned to a coach.
-- **Task** — an item within a session with category, due date, and verification/review settings.
-- **Attendance** — attendance recorded against a trainee for a specific session.
-- **Feedback** — coach feedback recorded against a trainee for a specific session (rating + skills).
-- **Experience** — a trainee's training-hours record, including location, coach notes, and approval status.
-
-## Features
-
-### Authentication & Account Flow
-
-- Splash screen checks Firebase Authentication for an existing signed-in user.
-- Unauthenticated users are routed to the Login screen.
-- Authenticated users have their Firestore user profile loaded, and are routed into a role-specific navigation shell (`superAdmin`, `headCoach`, `coach`, `trainee`).
-- Login supports email/password auth with error display.
-- Forgot Password sends a password-reset email.
-- Registration creates an auth account and matching user profile.
-- Logout is available from role dashboards / profile flow.
-
-### Dashboards
-
-**Super Admin**
-- Live counts for total users, coaches, trainees, and programmes.
-- Navigation to Manage Users and Manage Programmes.
-- Sessions entry point currently requires selecting a Programme and Phase first (no global session view yet).
-- Reports & Analytics entry point present but not yet implemented.
-- Messages and Logout navigation.
-
-**Head Coach**
-- Summary cards and schedule-style content.
-- Navigation concepts for coaches, trainees, sessions, programmes, and pending tasks.
-- Programme navigation wired to the programme list with edit enabled, delete disabled.
-- Some dashboard values are currently static rather than live-calculated.
-
-**Coach**
-- Welcome area, summary cards, and today's schedule.
-- Concepts for My Trainees, Sessions Today, My Tasks, and Attendance.
-- Dashboard metrics and schedule are currently hard-coded sample values.
-- Drawer entries for My Trainees, Sessions, and Tasks exist visually but are not yet wired to actions.
-
-**Trainee**
-- Summary cards for sessions, tasks, progress, and attendance.
-- Sample schedule content.
-- My Attendance opens the attendance history screen.
-- My Sessions and My Tasks are currently placeholders.
-- Experience tab is currently a placeholder screen.
-
-### User Management
-
-- Live list of Firestore users with search by name/email.
-- Filter by role (All, Super Admin, Head Coach, Coach, Trainee).
-- User detail screen showing role, programme assignment, and active/inactive status.
-- Activate/deactivate users, change role, delete user profile.
-- Create new user profile records (name, email, role).
-
-### Programme Management
-
-- Live Firestore stream listing.
-- Create with name, description, season, start/end date, and status.
-- Status options: `Draft`, `Active`, `Completed`.
-- View, edit, delete (permission-dependent).
-- Links to phase management.
-
-### Phase Management
-
-- Belongs to a programme; listed in order.
-- Create with title, description, order, start/end date, and status (`Draft`, `Active`, `Completed`).
-- View, edit, delete (permission-dependent).
-- Links to session management.
-
-### Session Management
-
-- Belongs to a programme and phase.
-- Create with title, description, coach name, date, start/end time, and status (`Draft`, `Scheduled`, `Completed`).
-- Listed in date order.
-- Edit/delete controls are permission-driven.
-- Links to Tasks, Attendance, and Feedback, plus trainee selection/experience functionality.
-
-### Task Management
-
-- Belongs to a session.
-- Create with title, description, category, status, and due date.
-- Categories: `Technique`, `Fitness`, `Safety`, `Assessment`, `Theory`, `Other`.
-- Statuses: `Pending`, `In Progress`, `Completed`.
-- Toggle Auto Verify and Coach Review Required.
-- Stores `createdBy` and `assignedTo`.
-- Listed in due-date order.
-
-### Attendance Management
-
-- Belongs to a session; listed live.
-- Mark Attendance form creates a record.
-- Status values: `Present`, `Late`, `Excused`, `Absent`.
-- Stores trainee, status, check-in time, notes, `markedBy`, and `markedAt`.
-- Trainees see a My Attendance screen with a calculated attendance percentage.
-
-### Coach Feedback / Skill Assessment
-
-- Belongs to a session.
-- Coach selects a trainee from active trainees assigned to the programme.
-- Feedback includes title, free-text feedback, and a 1–5 star rating.
-- Skill tags: `Balance`, `Edge Control`, `Turning`, `Carving`, `Pole Plant`, `Parallel Turns`, `Snowplough`, `Speed Control`, `Confidence`, `Safety Awareness`.
-- Ordered by creation date; view/edit/delete per permission flags.
-
-### Trainee Experience / 70-Hour Tracking
-
-- Stored per trainee.
-- Create with trainee, session title, hours, location, coach notes, date, and status.
-- Status workflow: `Pending` / `Approved` / `Rejected`.
-- Newest records listed first.
-- Approved hours are summed from `Approved` records.
-- Remaining hours and completion percentage are calculated against a **70-hour** target (`approved hours / 70 × 100`).
-
-### Messaging
-
-- Messages/Conversations screen; New Message screen lists other users.
-- Conversation ID deterministically generated from sorted user IDs.
-- Conversation document stores participants, `lastMessage`, and `updatedAt`.
-- Messages store sender/receiver, text, attachment URL, read state, and sent time, displayed chronologically.
-- Messages can be marked as read; update/delete service methods exist.
-- Conversation list filtered to the current user's conversations, ordered by latest activity.
-
-## Firestore Data Structure
+## Project structure
 
 ```
-users/{userId}
-users/{traineeId}/experience/{experienceId}
-
-programmes/{programmeId}
-programmes/{programmeId}/phases/{phaseId}
-programmes/{programmeId}/phases/{phaseId}/sessions/{sessionId}
-programmes/{programmeId}/phases/{phaseId}/sessions/{sessionId}/tasks/{taskId}
-programmes/{programmeId}/phases/{phaseId}/sessions/{sessionId}/attendance/{attendanceId}
-programmes/{programmeId}/phases/{phaseId}/sessions/{sessionId}/feedback/{feedbackId}
-
-conversations/{conversationId}/messages/{messageId}
+lib/
+  models/       Data models (User, Programme, Phase, Session, Task,
+                SkiHours, Feedback, Attendance, Message, Branding)
+  services/     Firestore access, auth, pace calc, engagement scoring,
+                offline sync, PDF/XLSX export, branding
+  providers/    State management (Provider/ChangeNotifier)
+  screens/      UI, organised by role + shared screens
+  widgets/      Shared UI components
+  utils/        Theme, constants
+firestore.rules Security rules draft
 ```
 
-## Permissions Overview
+## Next steps
 
-**Programme Management**
-
-| Role | Create / List | Edit | Delete |
-|---|---|---|---|
-| Super Admin | Yes | Yes | Yes |
-| Head Coach | Yes / List | Yes | No |
-| Coach | List | No | No |
-| Trainee | No | No | No |
-
-Edit/delete permissions for phases, sessions, tasks, attendance, and feedback are similarly permission-driven based on role.
-
-## Known Limitations / In-Progress Areas
-
-- Super Admin's Reports & Analytics screen is not yet implemented.
-- Super Admin Sessions entry requires manual Programme/Phase selection rather than a global session view.
-- Head Coach and Coach dashboards show static/hard-coded sample metrics rather than live-calculated values.
-- Coach drawer entries (My Trainees, Sessions, Tasks) are visually present but not yet wired to actions.
-- Trainee My Sessions, My Tasks, and Experience tab are currently placeholder screens.
-
-## Getting Started
-
-### Prerequisites
-
-- Flutter SDK installed
-- A configured Firebase project (Authentication, Cloud Firestore, Firebase Storage, Firebase Cloud Messaging)
-- `google-services.json` / `GoogleService-Info.plist` added for your platform(s)
-
-### Installation
-
-```bash
-git clone <repository-url>
-cd bass-training-app
-flutter pub get
-```
-
-### Firebase Setup
-
-1. Create a Firebase project and enable **Authentication** (email/password), **Cloud Firestore**, and **Firebase Storage**.
-2. Add your platform apps (Android/iOS/Web) in the Firebase console.
-3. Download and place the platform config files in the appropriate directories.
-4. Run `flutterfire configure` if using FlutterFire CLI to generate `firebase_options.dart`.
-
-### Run the App
-
-```bash
-flutter run
-```
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+If this looks like the right foundation, the natural next steps are:
+(1) feed it into Primio as the starting codebase per your brief, or
+(2) have a developer run through the "still needs real dev time" list
+above directly against a live Firebase project and real devices. The
+data model and the pace/engagement calculation logic should hold up as
+the backbone either way.
